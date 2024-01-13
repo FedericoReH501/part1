@@ -102,6 +102,7 @@ const typeDefs = `
         name: String
         id: String!
         born: Int
+        bookCount:Int
     }
   type Book{
     title:String
@@ -124,6 +125,9 @@ const resolvers = {
     authorCount: () => authors.length,
     allAuthor: () => authors,
     allBook: () => books,
+  },
+  Authors: {
+    bookCount: () => 5,
   },
 }
 
