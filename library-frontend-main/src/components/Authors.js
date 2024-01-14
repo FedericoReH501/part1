@@ -10,7 +10,7 @@ const Authors = (props) => {
       }
     }
   `
-  const response = useQuery(ALL_AUTHORS)
+  const response = useQuery(ALL_AUTHORS, { pollInterval: 2000 })
 
   if (!props.show) {
     return null
