@@ -172,9 +172,7 @@ const resolvers = {
         return null
       }
       const updatedAuthor = { ...author, born: args.born }
-      console.log("args born", args.born)
       authors = authors.map((a) => (a.id === author.id ? updatedAuthor : a))
-      console.log(authors)
       return updatedAuthor
     },
   },

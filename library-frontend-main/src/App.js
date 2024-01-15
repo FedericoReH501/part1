@@ -2,7 +2,6 @@ import { useState } from "react"
 import Authors from "./components/Authors"
 import Books from "./components/Books"
 import NewBook from "./components/NewBook"
-import { gql, useQuery } from "@apollo/client"
 
 const App = () => {
   const [page, setPage] = useState("authors")
