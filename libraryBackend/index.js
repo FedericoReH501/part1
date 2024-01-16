@@ -94,25 +94,24 @@ const resolvers = {
       books.filter((b) => b.author === root.name).length,
   },
   Mutation: {
-    addBook: (root, args) => {
-      console.log("proooova")
-      if (authors.filter((a) => a.name === args.author).length === 0) {
-        const author = { name: args.author, id: uuid() }
-
-        authors = authors.concat(author)
+    addBook: async (root, args) => {
+      const author = await Author.findOne({ name: args.author })
+      if (!author) {
+        const newAuthor = new Author({ name: args.author })
+        await newAuthor.save()
       }
-      const book = { ...args, id: uuid() }
-      books = books.concat(book)
-      return book
+      const newBook = new Book({ ...args, author: author._id })
+      return newBook.save()
     },
-    editAuthor: (root, args) => {
-      const author = authors.find((a) => a.name === args.name)
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name })
       if (!author) {
         return null
       }
-      const updatedAuthor = { ...author, born: args.born }
-      authors = authors.map((a) => (a.id === author.id ? updatedAuthor : a))
-      return updatedAuthor
+      const intBorn = parseInt(args.born, 10)
+      author.born = intBorn
+
+      return author.save()
     },
   },
 }
