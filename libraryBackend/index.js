@@ -1,6 +1,9 @@
 const { ApolloServer } = require("@apollo/server")
 const { startStandaloneServer } = require("@apollo/server/standalone")
 const { v1: uuid } = require("uuid")
+const mongoose = require("mongoose")
+mongoose.set("strictQuery", false)
+const Person = require("./models/Author")
 
 let authors = [
   {
