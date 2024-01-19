@@ -15,7 +15,9 @@ const ADD_BOOK = gql`
       genres: $genres
     ) {
       title
-      author
+      author {
+        name
+      }
       id
       published
       genres
@@ -35,7 +37,6 @@ const ALL_AUTHORS = gql`
     allAuthor {
       name
       born
-      bookCount
     }
   }
 `
@@ -59,9 +60,6 @@ const NewBook = (props) => {
     return <div>....loading</div>
   }
 
-  if (!props.show) {
-    return null
-  }
   const authors = response.data.allAuthor
 
   const submit = async (event) => {
