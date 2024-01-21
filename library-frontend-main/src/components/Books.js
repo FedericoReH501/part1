@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client"
-import { ALL_BOOKS } from "../queries"
+import { ALL_BOOKS, ALL_GENRES } from "../queries"
 import { useState } from "react"
 const Books = (props) => {
   const [selectedGenre, setSelectedGenre] = useState(null)
@@ -7,16 +7,19 @@ const Books = (props) => {
     variables: { genre: selectedGenre },
     pollInterval: undefined,
   })
+  const genresResponse = useQuery(ALL_GENRES, { pollInterval: undefined })
   if (!props.show) {
     return null
   }
-  if (response.loading) {
+  if (response.loading || genresResponse.loading) {
     return <div>.....loading</div>
   }
-  const books = response.data.allBook
+  const genres = response.data.allBook
 
+  const books = response.data.allBook
+  console.log(genres)
   let allGenres = []
-  books.forEach((book) => {
+  genres.forEach((book) => {
     book.genres.forEach((g) => {
       if (!allGenres.includes(g)) {
         allGenres = allGenres.concat(g)
