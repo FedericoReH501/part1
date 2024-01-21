@@ -1,47 +1,9 @@
 import { useState } from "react"
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { useMutation, useQuery } from "@apollo/client"
 import Select from "react-select"
-const ADD_BOOK = gql`
-  mutation addBook(
-    $title: String!
-    $author: String!
-    $published: Int!
-    $genres: [String]
-  ) {
-    addBook(
-      title: $title
-      author: $author
-      published: $published
-      genres: $genres
-    ) {
-      title
-      author {
-        name
-      }
-      id
-      published
-      genres
-    }
-  }
-`
-const EDIT_AUTHOR = gql`
-  mutation editAuthor($name: String!, $born: Int!) {
-    editAuthor(name: $name, born: $born) {
-      name
-      born
-    }
-  }
-`
-const ALL_AUTHORS = gql`
-  query {
-    allAuthor {
-      name
-      born
-    }
-  }
-`
+import { ALL_AUTHORS, ALL_BOOKS, ADD_BOOK, EDIT_AUTHOR } from "../queries"
 
-const NewBook = (props) => {
+const NewBook = ({ notify, show }) => {
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
   const [published, setPublished] = useState("")
@@ -49,11 +11,22 @@ const NewBook = (props) => {
   const [genres, setGenres] = useState([])
   const [name, setName] = useState("")
   const [born, setBorn] = useState("")
-  const [newBook] = useMutation(ADD_BOOK)
-  const [editAuthor] = useMutation(EDIT_AUTHOR)
-  const response = useQuery(ALL_AUTHORS, { pollInterval: 2000 })
 
-  if (!props.show) {
+  const [newBook] = useMutation(ADD_BOOK, {
+    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    onError: (error) => {
+      notify(error.graphQLErrors[0].message)
+    },
+  })
+
+  const [editAuthor] = useMutation(EDIT_AUTHOR, {
+    onError: (error) => {
+      notify(error.graphQLErrors[0].message)
+    },
+  })
+  const response = useQuery(ALL_AUTHORS)
+
+  if (!show) {
     return null
   }
   if (response.loading) {
@@ -65,10 +38,8 @@ const NewBook = (props) => {
   const submit = async (event) => {
     event.preventDefault()
     const intPublished = parseInt(published, 10)
-    console.log(intPublished)
-    console.log(published)
+
     newBook({ variables: { title, author, published: intPublished, genres } })
-    console.log("add book...")
 
     setTitle("")
     setPublished("")
@@ -81,7 +52,6 @@ const NewBook = (props) => {
     const intBorn = parseInt(born, 10)
 
     editAuthor({ variables: { name: name.value, born: intBorn } })
-    console.log("edit Author...")
 
     setName("")
     setBorn("")
@@ -95,8 +65,6 @@ const NewBook = (props) => {
   authors.forEach((a) => {
     option.push({ value: a.name, label: a.name })
   })
-  console.log("name: ")
-  console.log(name)
 
   return (
     <div>
@@ -144,7 +112,6 @@ const NewBook = (props) => {
             placeholder={"choose an author "}
             value={name}
             onChange={(v) => {
-              console.log(v.value)
               setName(v)
             }}
             options={option}

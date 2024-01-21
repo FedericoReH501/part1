@@ -80,7 +80,7 @@ const resolvers = {
     me: (root, args, context) => context.currentUser,
     bookCount: () => books.length,
     authorCount: () => authors.length,
-    allAuthor: async (root, args) => {
+    allAuthor: async (root, args, context) => {
       return Author.find({})
     },
     allBook: async (root, args) => {
@@ -119,13 +119,12 @@ const resolvers = {
           },
         })
       }
-      const author = await Author.findOne({ name: args.author })
+      let author = await Author.findOne({ name: args.author })
       if (!author) {
         const newAuthor = new Author({ name: args.author })
         try {
-          await newAuthor.save()
+          author = await newAuthor.save()
         } catch (error) {
-          console.log("erroreeee")
           throw new GraphQLError("Saving new author failed", {
             extensions: {
               code: "BAD_USER_INPUT",
@@ -148,6 +147,8 @@ const resolvers = {
           },
         })
       }
+      console.log("added a new book:  ", newBook)
+      console.log("------------------------------------")
       return newBook
     },
     editAuthor: async (root, args, { currentUser }) => {
@@ -207,7 +208,7 @@ startStandaloneServer(server, {
   context: async ({ req, res }) => {
     const auth = req ? req.headers.authorization : null
     if (auth && auth.startsWith("Bearer ")) {
-      const decodedToken = jwt.verify(auth.substring(7), process.env.SECRET)
+      const decodedToken = jwt.verify(auth.substring(8), process.env.SECRET)
       const currentUser = await User.findById(decodedToken.id)
       return { currentUser }
     }
