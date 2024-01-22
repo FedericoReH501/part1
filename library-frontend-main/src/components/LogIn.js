@@ -21,6 +21,7 @@ const Login = ({ setToken, notify, show }) => {
   })
 
   useEffect(() => {
+    console.log("using effect")
     if (result.data) {
       const token = result.data.login.value
       setToken(token)
@@ -30,9 +31,11 @@ const Login = ({ setToken, notify, show }) => {
 
   const logIn = async (e) => {
     e.preventDefault()
-    const result = await login({ variables: { username, password } })
+    await login({ variables: { username, password } })
+    console.log("azzero user e password")
     setUsername("")
     setpassword("")
+    console.log("user:", username)
   }
   if (show) {
     return (
@@ -41,6 +44,7 @@ const Login = ({ setToken, notify, show }) => {
           <div>
             username:
             <input
+              value={username}
               type="username"
               label="username"
               onChange={({ target }) => setUsername(target.value)}
@@ -49,6 +53,7 @@ const Login = ({ setToken, notify, show }) => {
           <div>
             password:
             <input
+              value={password}
               type="password"
               onChange={({ target }) => setpassword(target.value)}
             ></input>

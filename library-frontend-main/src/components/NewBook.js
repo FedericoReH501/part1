@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@apollo/client"
 import Select from "react-select"
 import { ALL_AUTHORS, ALL_BOOKS, ADD_BOOK, EDIT_AUTHOR } from "../queries"
 
-const NewBook = ({ notify, show }) => {
+const NewBook = ({ notify, show, selectedGenre }) => {
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
   const [published, setPublished] = useState("")
@@ -15,7 +15,20 @@ const NewBook = ({ notify, show }) => {
   const [newBook] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
     onError: (error) => {
+      console.log("'why i'm here'")
+      console.log(error)
       notify(error.graphQLErrors[0].message)
+    },
+    update: (cache, response) => {
+      console.log("updating:")
+      console.log("----------------------------")
+      const variables = { genre: selectedGenre }
+      cache.updateQuery(
+        { query: ALL_BOOKS, variables: variables },
+        ({ allBook }) => {
+          return { allBook: allBook.concat(response.data.addBook) }
+        }
+      )
     },
   })
 

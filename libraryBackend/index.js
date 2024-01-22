@@ -48,6 +48,8 @@ const typeDefs = `
     authorCount: Int
     bookCount: Int
     allBook(author:String,genre:String): [Book!]
+    recomended(genre:String):[Book]
+    allGenres: [String]
     allAuthor: [Author]
     me: User
   }
@@ -77,11 +79,30 @@ const typeDefs = `
 
 const resolvers = {
   Query: {
-    me: (root, args, context) => context.currentUser,
+    me: (root, args, context) => {
+      return context.currentUser
+    },
+    recomended: async (root, args, { currentUser }) => {
+      const favoriteGenre = currentUser.favoriteGenre
+
+      return Book.find({ genres: favoriteGenre }).populate("author")
+    },
     bookCount: () => books.length,
     authorCount: () => authors.length,
     allAuthor: async (root, args, context) => {
       return Author.find({})
+    },
+    allGenres: async () => {
+      let allGenres = []
+      const books = await Book.find({})
+      books.forEach((book) => {
+        book.genres.forEach((g) => {
+          if (!allGenres.includes(g)) {
+            allGenres = allGenres.concat(g)
+          }
+        })
+      })
+      return allGenres
     },
     allBook: async (root, args) => {
       if (!args.author && !args.genre) {
@@ -134,11 +155,10 @@ const resolvers = {
           })
         }
       }
-      const newBook = new Book({ ...args, author: author._id })
+      const newBook = new Book({ ...args, author: author })
       try {
         await newBook.save()
       } catch (error) {
-        console.log(error)
         throw new GraphQLError("Saving newBook failed", {
           extensions: {
             code: "BAD_USER_INPUT",
@@ -147,8 +167,6 @@ const resolvers = {
           },
         })
       }
-      console.log("added a new book:  ", newBook)
-      console.log("------------------------------------")
       return newBook
     },
     editAuthor: async (root, args, { currentUser }) => {
@@ -184,7 +202,7 @@ const resolvers = {
       return newUser
     },
     login: async (root, args) => {
-      const user = await User.findOne({ userName: args.userName })
+      const user = await User.findOne({ username: args.username })
       if (!user || args.password !== "password") {
         throw new GraphQLError("wrong credentials", {
           extensions: {
@@ -207,6 +225,7 @@ startStandaloneServer(server, {
   listen: { port: 4000 },
   context: async ({ req, res }) => {
     const auth = req ? req.headers.authorization : null
+
     if (auth && auth.startsWith("Bearer ")) {
       const decodedToken = jwt.verify(auth.substring(8), process.env.SECRET)
       const currentUser = await User.findById(decodedToken.id)
