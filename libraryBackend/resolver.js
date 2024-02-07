@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken")
 
 const mongoose = require("mongoose")
 mongoose.set("strictQuery", false)
-
+const { PubSub } = require("graphql-subscriptions")
+const pubsub = new PubSub()
 const Author = require("./models/autor")
 const Book = require("./models/book")
 const User = require("./models/user")
@@ -73,11 +74,13 @@ const resolvers = {
           },
         })
       }
+      console.log("The user is Logged")
       let author = await Author.findOne({ name: args.author })
       if (!author) {
         const newAuthor = new Author({ name: args.author })
         try {
           author = await newAuthor.save()
+          console.log("new author saved")
         } catch (error) {
           throw new GraphQLError("Saving new author failed", {
             extensions: {
@@ -89,8 +92,10 @@ const resolvers = {
         }
       }
       const newBook = new Book({ ...args, author: author })
+      console.log("new book pending..:", newBook)
       try {
         await newBook.save()
+        console.log("nuovo libro salvato!")
       } catch (error) {
         throw new GraphQLError("Saving newBook failed", {
           extensions: {
@@ -145,6 +150,11 @@ const resolvers = {
       }
       const userForToken = { username: user.username, id: user._id }
       return { value: jwt.sign(userForToken, process.env.SECRET) }
+    },
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator("BOOK_ADDED"),
     },
   },
 }

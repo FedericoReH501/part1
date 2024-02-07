@@ -5,7 +5,7 @@ import NewBook from "./components/NewBook"
 import Login from "./components/LogIn"
 import Notify from "./components/Notify"
 import { useApolloClient, useSubscription } from "@apollo/client"
-
+import { BOOK_ADDED } from "./queries"
 import Recomended from "./components/Recomended"
 
 const App = () => {
@@ -15,6 +15,12 @@ const App = () => {
   const [selectedGenre, setSelectedGenre] = useState(null)
   const client = useApolloClient()
 
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      console.log("subription success:")
+      console.log(data)
+    },
+  })
   useEffect(() => {
     setToken(localStorage.getItem("user-token"))
   }, [])
