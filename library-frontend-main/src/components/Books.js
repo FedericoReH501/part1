@@ -7,7 +7,10 @@ const Books = ({ show, selectedGenre, setSelectedGenre }) => {
     pollInterval: undefined,
   })
 
-  const genresResponse = useQuery(ALL_GENRES, { pollInterval: undefined })
+  const genresResponse = useQuery(ALL_GENRES, {
+    pollInterval: undefined,
+  })
+
   if (!show) {
     return null
   }
@@ -15,6 +18,7 @@ const Books = ({ show, selectedGenre, setSelectedGenre }) => {
     return <div>.....loading</div>
   }
   const genres = genresResponse.data.allGenres
+
   const books = response.data.allBook
 
   return (
@@ -38,11 +42,22 @@ const Books = ({ show, selectedGenre, setSelectedGenre }) => {
         </tbody>
       </table>
       {genres.map((g) => (
-        <button key={g} onClick={() => setSelectedGenre(g)}>
+        <button
+          key={g}
+          onClick={() => {
+            setSelectedGenre(g)
+          }}
+        >
           {g}
         </button>
       ))}
-      <button onClick={() => setSelectedGenre(null)}>Clean</button>
+      <button
+        onClick={() => {
+          setSelectedGenre(null)
+        }}
+      >
+        Clean
+      </button>
     </div>
   )
 }

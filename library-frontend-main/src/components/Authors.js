@@ -17,7 +17,6 @@ const Authors = ({ show, notify }) => {
     return null
   }
   const authors = response.data.allAuthor
-  console.log("passo qui")
   return (
     <div>
       <h2>authors</h2>

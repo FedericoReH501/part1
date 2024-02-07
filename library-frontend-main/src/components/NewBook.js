@@ -1,7 +1,13 @@
 import { useState } from "react"
 import { useMutation, useQuery } from "@apollo/client"
 import Select from "react-select"
-import { ALL_AUTHORS, ALL_BOOKS, ADD_BOOK, EDIT_AUTHOR } from "../queries"
+import {
+  ALL_AUTHORS,
+  ALL_BOOKS,
+  ADD_BOOK,
+  EDIT_AUTHOR,
+  ALL_GENRES,
+} from "../queries"
 
 const NewBook = ({ notify, show, selectedGenre }) => {
   const [title, setTitle] = useState("")
@@ -13,22 +19,46 @@ const NewBook = ({ notify, show, selectedGenre }) => {
   const [born, setBorn] = useState("")
 
   const [newBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
     onError: (error) => {
-      console.log("'why i'm here'")
-      console.log(error)
+      console.log("Error:", error)
       notify(error.graphQLErrors[0].message)
     },
-    update: (cache, response) => {
-      console.log("updating:")
-      console.log("----------------------------")
-      const variables = { genre: selectedGenre }
+    update: (cache, res) => {
+      // Your update logic here...
+      console.log("updating...")
+      // For example, updating the cache for the ALL_BOOKS query
       cache.updateQuery(
-        { query: ALL_BOOKS, variables: variables },
+        { query: ALL_BOOKS, variables: { genre: null } },
         ({ allBook }) => {
-          return { allBook: allBook.concat(response.data.addBook) }
+          console.log("allbook :")
+          console.log(allBook)
+          const updatedData = allBook.concat(res.data.addBook)
+          return { allBook: updatedData }
         }
       )
+      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthor }) => {
+        // Assuming the author data is available in the book result
+        const author = res.data.addBook.author
+        console.log("update......")
+
+        // Check if the author already exists in the list
+        const existingAuthor = allAuthor.find((a) => a.name === author.name)
+        // If not, add the new author to the list
+        if (!existingAuthor) {
+          const updatedAuthors = [...allAuthor, { ...author, bookCount: 1 }]
+          return { allAuthor: updatedAuthors }
+        }
+
+        // If the author already exists, update bookcount
+        const updateList = allAuthor.map((a) => {
+          if (a.name === author.name) {
+            return { ...author, bookCount: a.bookCount + 1 }
+          }
+          return a
+        })
+        console.log("updated list", updateList)
+        return { allAuthor: updateList }
+      })
     },
   })
 
