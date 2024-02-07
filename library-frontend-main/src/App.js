@@ -4,7 +4,8 @@ import Books from "./components/Books"
 import NewBook from "./components/NewBook"
 import Login from "./components/LogIn"
 import Notify from "./components/Notify"
-import { useApolloClient } from "@apollo/client"
+import { useApolloClient, useSubscription } from "@apollo/client"
+
 import Recomended from "./components/Recomended"
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
   }, [])
 
   const notify = (message) => {
+    console.log("error :")
     setMessage(message)
     setTimeout(() => {
       setMessage(null)
@@ -29,9 +31,11 @@ const App = () => {
       <div>
         <button onClick={() => setPage("authors")}>authors</button>
         <button onClick={() => setPage("books")}>books</button>
-        <button onClick={() => setPage("add")}>add book</button>
         {!token ? null : (
-          <button onClick={() => setPage("recomended")}>recomended</button>
+          <div>
+            <button onClick={() => setPage("add")}>add book</button>
+            <button onClick={() => setPage("recomended")}>recomended</button>
+          </div>
         )}
         {!token ? (
           <button onClick={() => setPage("login")}>login</button>
@@ -48,7 +52,7 @@ const App = () => {
         )}
       </div>
       <Notify message={message}></Notify>
-      <Authors show={page === "authors"} />
+      <Authors show={page === "authors"} notify={notify} />
 
       <Books
         show={page === "books"}
