@@ -5,7 +5,7 @@ import NewBook from "./components/NewBook"
 import Login from "./components/LogIn"
 import Notify from "./components/Notify"
 import { useApolloClient, useSubscription } from "@apollo/client"
-import { BOOK_ADDED } from "./queries"
+import { ALL_BOOKS, BOOK_ADDED } from "./queries"
 import Recomended from "./components/Recomended"
 
 const App = () => {
@@ -16,9 +16,20 @@ const App = () => {
   const client = useApolloClient()
 
   useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
+    onData: ({ data, client }) => {
       console.log("subription success:")
-      console.log(data)
+      console.log(data.data.bookAdded)
+      client.cache.updateQuery(
+        { query: ALL_BOOKS, variables: { genre: null } },
+        ({ allBook }) => {
+          return {
+            allBook: allBook.concat(data.data.bookAdded),
+          }
+        }
+      )
+      notify(
+        `A new book: ${data.data.bookAdded.title}, by: ${data.data.bookAdded.author}!!`
+      )
     },
   })
   useEffect(() => {
@@ -30,7 +41,7 @@ const App = () => {
     setMessage(message)
     setTimeout(() => {
       setMessage(null)
-    }, 2000)
+    }, 10000)
   }
   return (
     <div>

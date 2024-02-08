@@ -24,8 +24,6 @@ const NewBook = ({ notify, show, selectedGenre }) => {
       cache.updateQuery(
         { query: ALL_BOOKS, variables: { genre: null } },
         ({ allBook }) => {
-          console.log("allbook :")
-          console.log(allBook)
           const updatedData = allBook.concat(res.data.addBook)
           return { allBook: updatedData }
         }
@@ -33,7 +31,6 @@ const NewBook = ({ notify, show, selectedGenre }) => {
       cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthor }) => {
         // Assuming the author data is available in the book result
         const author = res.data.addBook.author
-        console.log("update......")
 
         // Check if the author already exists in the list
         const existingAuthor = allAuthor.find((a) => a.name === author.name)
@@ -50,7 +47,6 @@ const NewBook = ({ notify, show, selectedGenre }) => {
           }
           return a
         })
-        console.log("updated list", updateList)
         return { allAuthor: updateList }
       })
     },

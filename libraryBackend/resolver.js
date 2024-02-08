@@ -3,8 +3,10 @@ const jwt = require("jsonwebtoken")
 
 const mongoose = require("mongoose")
 mongoose.set("strictQuery", false)
+
 const { PubSub } = require("graphql-subscriptions")
 const pubsub = new PubSub()
+
 const Author = require("./models/autor")
 const Book = require("./models/book")
 const User = require("./models/user")
@@ -24,7 +26,8 @@ const resolvers = {
     bookCount: () => books.length,
     authorCount: () => authors.length,
     allAuthor: async (root, args, context) => {
-      console.log("fetching authors")
+      console.log("Authors.find")
+      console.log("-------------------")
       return Author.find({})
     },
     allGenres: async () => {
@@ -40,7 +43,8 @@ const resolvers = {
       return allGenres
     },
     allBook: async (root, args) => {
-      console.log("fetching ALL_BOOK")
+      console.log("Books")
+      console.log("-------------------")
       if (!args.author && !args.genre) {
         return Book.find({}).populate("author")
       }
@@ -64,6 +68,8 @@ const resolvers = {
   Author: {
     bookCount: async (root, args) => {
       const writtenBook = await Book.find({ author: root._id })
+      console.log("Book.find")
+      console.log("-------------------")
       return writtenBook.length
     },
   },
@@ -103,6 +109,7 @@ const resolvers = {
           },
         })
       }
+      pubsub.publish("BOOK_ADDED", { bookAdded: newBook })
       return newBook
     },
     editAuthor: async (root, args, { currentUser }) => {
@@ -153,8 +160,6 @@ const resolvers = {
   Subscription: {
     bookAdded: {
       subscribe: () => {
-        console.log("subscirbing")
-
         return pubsub.asyncIterator("BOOK_ADDED")
       },
     },
