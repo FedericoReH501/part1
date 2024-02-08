@@ -1,13 +1,7 @@
 import { useState } from "react"
 import { useMutation, useQuery } from "@apollo/client"
 import Select from "react-select"
-import {
-  ALL_AUTHORS,
-  ALL_BOOKS,
-  ADD_BOOK,
-  EDIT_AUTHOR,
-  ALL_GENRES,
-} from "../queries"
+import { ALL_AUTHORS, ALL_BOOKS, ADD_BOOK, EDIT_AUTHOR } from "../queries"
 
 const NewBook = ({ notify, show, selectedGenre }) => {
   const [title, setTitle] = useState("")
